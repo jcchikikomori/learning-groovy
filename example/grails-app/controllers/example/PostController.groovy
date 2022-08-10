@@ -1,17 +1,24 @@
 package example
 
-import grails.validation.ValidationException
 import static org.springframework.http.HttpStatus.*
 
+import grails.validation.ValidationException
+
+/**
+ * This is a controller class. It is responsible for handling requests and returning responses.
+ */
 class PostController {
 
     PostService postService
 
-    static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
+    static postLabelCode = 'post.label'
+    static postLabelDefault = 'Post'
+
+    static allowedMethods = [save: 'POST', update: 'PUT', delete: 'DELETE']
 
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
-        respond postService.list(params), model:[postCount: postService.count()]
+        respond postService.list(params), model: [postCount: postService.count()]
     }
 
     def show(Long id) {
@@ -31,13 +38,14 @@ class PostController {
         try {
             postService.save(post)
         } catch (ValidationException e) {
-            respond post.errors, view:'create'
-            return
+            respond post.errors, view: 'create'
         }
 
         request.withFormat {
             form multipartForm {
-                flash.message = message(code: 'default.created.message', args: [message(code: 'post.label', default: 'Post'), post.id])
+                flash.message = message(
+                    code: 'default.created.message',
+                    args: [message(code: postLabelCode, default: postLabelDefault), post.id])
                 redirect post
             }
             '*' { respond post, [status: CREATED] }
@@ -57,16 +65,17 @@ class PostController {
         try {
             postService.save(post)
         } catch (ValidationException e) {
-            respond post.errors, view:'edit'
-            return
+            respond post.errors, view: 'edit'
         }
 
         request.withFormat {
             form multipartForm {
-                flash.message = message(code: 'default.updated.message', args: [message(code: 'post.label', default: 'Post'), post.id])
+                flash.message = message(
+                    code: 'default.updated.message',
+                    args: [message(code: postLabelCode, default: postLabelDefault), post.id])
                 redirect post
             }
-            '*'{ respond post, [status: OK] }
+            '*' { respond post, [status: OK] }
         }
     }
 
@@ -80,20 +89,25 @@ class PostController {
 
         request.withFormat {
             form multipartForm {
-                flash.message = message(code: 'default.deleted.message', args: [message(code: 'post.label', default: 'Post'), id])
-                redirect action:"index", method:"GET"
+                flash.message = message(
+                    code: 'default.deleted.message',
+                    args: [message(code: postLabelCode, default: postLabelDefault), id])
+                redirect action: 'index', method: 'GET'
             }
-            '*'{ render status: NO_CONTENT }
+            '*' { render status: NO_CONTENT }
         }
     }
 
     protected void notFound() {
         request.withFormat {
             form multipartForm {
-                flash.message = message(code: 'default.not.found.message', args: [message(code: 'post.label', default: 'Post'), params.id])
-                redirect action: "index", method: "GET"
+                flash.message = message(
+                    code: 'default.not.found.message',
+                    args: [message(code: postLabelCode, default: postLabelDefault), params.id])
+                redirect action: 'index', method: 'GET'
             }
-            '*'{ render status: NOT_FOUND }
+            '*' { render status: NOT_FOUND }
         }
     }
+
 }
